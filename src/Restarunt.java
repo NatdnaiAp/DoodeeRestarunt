@@ -11,12 +11,12 @@ class Restarunt {
     public void removeCustomer(Customer customer,int id){
         this.customers.remove(id);
     }
-    public int payFood(int menuId,int customerId){
-        Menu menu = this.getMenuById(menuId);
+    public int payFood(int customerId){
+
         Customer customer = this.getCustomerById(customerId);
 
         int total = 0;
-        for(Menu price : customer.buyFoods){
+        for(Menu menu: customer.buyFoods){
 
             total += menu.price;
         }
@@ -24,21 +24,18 @@ class Restarunt {
 
     }
     public void pickUp(int menuId,int customerId){
-        Menu menu = this.getMenuById(menuId);
-        Customer customer = this.getCustomerById(customerId);
-        menu.status = " choose by "+customer.name;
-        customer.status= " choose menu "+menu.namef;
-
-
+        Menu menu = getMenuById(menuId);
+        Customer customer = getCustomerById(customerId);
+        /*menu.status = " choose by "+customer.name;*/
+        /*customer.status= " choose menu "+menu.namef;*/
+        customer.buyFoods.add(menu);
 //    this.books.remove(book);
-
-
         //Member member = this.getMemberById(memberId);
-        int customerIndex = this.getCustomerIndex(customer);
-        this.customers.get(customerIndex).buyFoods.add(menu);
+        /*int customerIndex = getCustomerIndex(customer);
+        customers.get(customerIndex).buyFoods.add(menu);*/
     }
     public Customer getCustomerById(int id) {
-        for (Customer customer : this.customers) {
+        for (Customer customer : customers) {
             if (customer.id == id) {
                 return customer;
             }
@@ -47,7 +44,7 @@ class Restarunt {
     }
 
     public Menu getMenuById(int id) {
-        for (Menu menu : this.menues) {
+        for (Menu menu : menues) {
             if (menu.id == id) {
                 return menu;
             }

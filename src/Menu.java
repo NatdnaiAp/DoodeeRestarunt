@@ -10,4 +10,9 @@ class Menu {
 
     }
 
+    public Menu(int id, String namef, int price) {
+        this.id = id;
+        this.namef = namef;
+        this.price = price;
+    }
 }

@@ -1,16 +1,14 @@
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.ArrayList;
+import java.sql.*;
+
 class Main {
 
         static  Scanner scan  = new Scanner(System.in);
         static Restarunt restarunt = new Restarunt();
-
-
-
-
+        static  Customer customer = new Customer();
         public static void main(String[] args) {
-            initLibraryData();
+
 
             String isContinue = "y";
 
@@ -19,9 +17,10 @@ class Main {
                 int selectedMenu = chooseMenu();
 
                 if (selectedMenu == 1) {
-                    showMenues();
+                    getAllMenu();
                 } else if (selectedMenu == 2) {
-                    showCustomer();
+                    getAllCustomer();
+
                 } else if (selectedMenu == 3) {
                     addCustomer();
                 } else if (selectedMenu == 4) {
@@ -38,79 +37,25 @@ class Main {
                 System.out.print("continue ? ");
                 isContinue = scan.next();
             }
+
         }
         public static void showMenu() {
             System.out.println("================================");
             System.out.println("       DooDee Restaurant :");
-            System.out.println("1. show MENU list");
-            System.out.println("2. show Customer list");
-            System.out.println("3. add Customer");
+            System.out.println("1. Show Menu List");
+            System.out.println("2. Show Customer List");
+            System.out.println("3. Add Customer");
             System.out.println("4. Buy Food");
             System.out.println("5. Pay Bills");
-            System.out.println("6. remove Customer");
+            System.out.println("6. Cancel Ordered");
             System.out.println("================================");
+
+
         }
-
-
-        public static void initLibraryData() {
-            Menu menu1 = new Menu();
-            menu1.id = 1;
-            menu1.namef = "ข้าวผัดกะเพราหมู";
-            menu1.price = 50;
-
-
-
-            Menu menu2= new Menu();
-            menu2.id = 2;
-            menu2.namef = "ก๋วยเตี๊ยวน้ำตกหมู";
-            menu2.price = 60;
-
-
-            Menu menu3 = new Menu();
-            menu3.id = 3;
-            menu3.namef = "ส้มตำไทไข่เค็ม";
-            menu3.price = 45;
-
-            Menu menu4 = new Menu();
-            menu4.id = 4;
-            menu4.namef = "ข้าวมันไก่";
-            menu4.price = 45;
-
-
-            Menu menu5 = new Menu();
-            menu5.id = 5;
-            menu5.namef = "ข้าวหมูกรอบ";
-            menu5.price = 55;
-
-            Menu menu6 = new Menu();
-            menu6.id = 6;
-            menu6.namef = "ข้าวไข่เจียว";
-            menu6.price = 30;
-
-
-            Customer customer1 = new Customer();
-            customer1.id = 1;
-            customer1.name = "Somchai";
-
-            Customer customer2 = new Customer();
-            customer2.id = 2;
-            customer2.name = "Somphong";
-
-            Customer customer3 = new Customer();
-            customer3.id = 3;
-            customer3.name = "Paserd";
-
-            restarunt.menues.add(menu1);
-            restarunt.menues.add(menu2);
-            restarunt.menues.add(menu3);
-            restarunt.menues.add(menu4);
-            restarunt.menues.add(menu5);
-            restarunt.menues.add(menu6);
-
-
-            restarunt.customers.add(customer1);
-            restarunt.customers.add(customer2);
-            restarunt.customers.add(customer3);
+        public static void showCustomer(){
+            for(Customer customer : restarunt.customers){
+                System.out.println(customer.id+"  "+customer.name);
+            }
         }
 
 
@@ -118,44 +63,154 @@ class Main {
             System.out.print("choose menu : ");
             int pilihan = scan.nextInt();
             return pilihan;
-
         }
-        public static void showMenues() {
-            for (Menu menu : restarunt.menues) {
-                System.out.println(menu.id + " " + menu.namef+" "+menu.price+" Bath"+""+menu.status);
-            }
-        }
-
         public static void payBills(){
-
-            System.out.print("id member : ");
+            removeCustomer();
+            System.out.print("Confirm ID For Pay Bills : ");
             Integer customerId = scan.nextInt();
 
-            Integer menuId = 1;
 
 
-            System.out.println(restarunt.payFood(menuId, customerId)+" Bath");
+            System.out.println(restarunt.payFood(customerId)+" บาท");
+
         }
     public static void pickFood() {
+        try
+        {
+            // create our mysql database connection
+            String myDriver = "com.mysql.cj.jdbc.Driver";
+            String myUrl = "jdbc:mysql://" + GlobalData.DATABASE_LOCATION + ":" + GlobalData.DATABASE_PORT + "/"
+                    + GlobalData.DATABASE_DATABASE_NAME;
+            Class.forName(myDriver);
+            Connection conn = DriverManager.getConnection(myUrl, GlobalData.DATABASE_USERNAME,
+                    GlobalData.DATABASE_PASSWORD);
+
+            // our SQL SELECT query.
+            // if you only need a few columns, specify them by name instead of using "*"
+            String query = "SELECT * FROM Menu ";
+
+            // create the java statement
+            Statement st = conn.createStatement();
+
+            // execute the query, and get a java resultset
+            ResultSet rs = st.executeQuery(query);
+
+            // iterate through the java resultset
+            while (rs.next())
+            {
+                int id = rs.getInt("id");
+                String namef = rs.getString("namef");
+                int price = rs.getInt("price");
+
+
+                Menu mu = new Menu(id, namef,price);
+                restarunt.menues.add(mu);
+
+                // print the results
+
+            }
+            st.close();
+        } catch (Exception e)
+        {
+            System.err.println("Got an exception! ");
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
+
+
+        try
+        {
+            // create our mysql database connection
+            String myDriver = "com.mysql.cj.jdbc.Driver";
+            String myUrl = "jdbc:mysql://" + GlobalData.DATABASE_LOCATION + ":" + GlobalData.DATABASE_PORT + "/"
+                    + GlobalData.DATABASE_DATABASE_NAME;
+            Class.forName(myDriver);
+            Connection conn = DriverManager.getConnection(myUrl, GlobalData.DATABASE_USERNAME,
+                    GlobalData.DATABASE_PASSWORD);
+
+            // our SQL SELECT query.
+            // if you only need a few columns, specify them by name instead of using "*"
+            String query = "SELECT * FROM Customer ";
+
+            // create the java statement
+            Statement st = conn.createStatement();
+
+            // execute the query, and get a java resultset
+            ResultSet rs = st.executeQuery(query);
+
+            // iterate through the java resultset
+            while (rs.next())
+            {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+
+
+                Customer cc = new Customer(id, name);
+                restarunt.customers.add(cc);
+
+                // print the results
+
+            }
+            st.close();
+        } catch (Exception e)
+        {
+            System.err.println("Got an exception! ");
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
+
+
+
         System.out.print("id member : ");
-        Integer memberId = scan.nextInt();
+        int memberId = scan.nextInt();
 
         System.out.print("id menu : ");
-        Integer menuId = scan.nextInt();
+        int menuId = scan.nextInt();
 
         restarunt.pickUp(menuId, memberId);
 
     }
     public static void addCustomer() {
-        Customer customer = new Customer();
 
         System.out.print("id : ");
-        customer.id = scan.nextInt();
+        int id = scan.nextInt();
 
         System.out.print("name : ");
-        customer.name = scan.next();
+        String name = scan.next();
+        Customer customer = new Customer(id,name);
+        try
+        {
 
-        restarunt.addCustomer(customer);
+            String myDriver = "com.mysql.cj.jdbc.Driver";
+            String myUrl = "jdbc:mysql://" + GlobalData.DATABASE_LOCATION + ":" + GlobalData.DATABASE_PORT + "/"
+                    + GlobalData.DATABASE_DATABASE_NAME;
+            Class.forName(myDriver);
+            Connection conn = DriverManager.getConnection(myUrl, GlobalData.DATABASE_USERNAME,
+                    GlobalData.DATABASE_PASSWORD);
+
+            // our SQL SELECT query.
+            // if you only need a few columns, specify them by name instead of using "*"
+            String query = "INSERT INTO Customer VALUES('" +customer.id+ "', '" + customer.name + "' ) ";
+
+            // create the java statement
+            Statement st = conn.createStatement();
+
+            // execute the query, and get a java resultset
+            st.executeUpdate(query);
+
+
+            // iterate through the java resultset
+
+            st.close();
+        } catch (Exception e)
+        {
+            System.err.println("Got an exception! ");
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
+
+
+
     }
 
     public static void removeCustomer() {
@@ -164,18 +219,142 @@ class Main {
         System.out.print("id : ");
         customer.id = scan.nextInt();
 
-        System.out.print("name : ");
-        customer.name = scan.next();
+        /*System.out.print("name : ");
+        customer.name = scan.next();*/
 
 
-        restarunt.removeCustomer(customer,customer.id);
+       /* restarunt.removeCustomer(customer,customer.id);*/
+
+        try
+        {
+
+            String myDriver = "com.mysql.cj.jdbc.Driver";
+            String myUrl = "jdbc:mysql://" + GlobalData.DATABASE_LOCATION + ":" + GlobalData.DATABASE_PORT + "/"
+                    + GlobalData.DATABASE_DATABASE_NAME;
+            Class.forName(myDriver);
+            Connection conn = DriverManager.getConnection(myUrl, GlobalData.DATABASE_USERNAME,
+                    GlobalData.DATABASE_PASSWORD);
+
+            // our SQL SELECT query.
+            // if you only need a few columns, specify them by name instead of using "*"
+            String query = "DELETE FROM Customer WHERE id = " + customer.id + " ";
+
+            // create the java statement
+            Statement st = conn.createStatement();
+
+            // execute the query, and get a java resultset
+            st.executeUpdate(query);
+
+            // iterate through the java resultset
+
+            st.close();
+        } catch (Exception e)
+        {
+            System.err.println("Got an exception! ");
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
+
     }
 
-    public static void showCustomer() {
-        for (Customer customer : restarunt.customers) {
-            System.out.println(customer.id + " " + customer.name+""+customer.status);
 
+
+    public static ArrayList<Customer> getAllCustomer()
+    {
+
+
+
+        try
+        {
+            // create our mysql database connection
+            String myDriver = "com.mysql.cj.jdbc.Driver";
+            String myUrl = "jdbc:mysql://" + GlobalData.DATABASE_LOCATION + ":" + GlobalData.DATABASE_PORT + "/"
+                    + GlobalData.DATABASE_DATABASE_NAME;
+            Class.forName(myDriver);
+            Connection conn = DriverManager.getConnection(myUrl, GlobalData.DATABASE_USERNAME,
+                    GlobalData.DATABASE_PASSWORD);
+
+            // our SQL SELECT query.
+            // if you only need a few columns, specify them by name instead of using "*"
+            String query = "SELECT * FROM Customer ";
+
+            // create the java statement
+            Statement st = conn.createStatement();
+
+            // execute the query, and get a java resultset
+            ResultSet rs = st.executeQuery(query);
+
+            // iterate through the java resultset
+            while (rs.next())
+            {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+
+
+                Customer cc = new Customer(id, name);
+                restarunt.customers.add(cc);
+
+                // print the results
+                System.out.format("%s. คุณ %s   \n", id, name );
+            }
+            st.close();
+        } catch (Exception e)
+        {
+            System.err.println("Got an exception! ");
+            System.err.println(e.getMessage());
+            e.printStackTrace();
         }
+
+        return restarunt.customers;
+    }
+    public static ArrayList<Menu> getAllMenu()
+    {
+
+
+
+        try
+        {
+            // create our mysql database connection
+            String myDriver = "com.mysql.cj.jdbc.Driver";
+            String myUrl = "jdbc:mysql://" + GlobalData.DATABASE_LOCATION + ":" + GlobalData.DATABASE_PORT + "/"
+                    + GlobalData.DATABASE_DATABASE_NAME;
+            Class.forName(myDriver);
+            Connection conn = DriverManager.getConnection(myUrl, GlobalData.DATABASE_USERNAME,
+                    GlobalData.DATABASE_PASSWORD);
+
+            // our SQL SELECT query.
+            // if you only need a few columns, specify them by name instead of using "*"
+            String query = "SELECT * FROM Menu ";
+
+            // create the java statement
+            Statement st = conn.createStatement();
+
+            // execute the query, and get a java resultset
+            ResultSet rs = st.executeQuery(query);
+
+            // iterate through the java resultset
+            while (rs.next())
+            {
+                int id = rs.getInt("id");
+                String namef = rs.getString("namef");
+                int price = rs.getInt("price");
+
+
+                Menu mu = new Menu(id, namef,price);
+                restarunt.menues.add(mu);
+
+                // print the results
+                System.out.format("เมนูที่ %s. %s  %s บาท \n", id, namef, price);
+            }
+            st.close();
+        } catch (Exception e)
+        {
+            System.err.println("Got an exception! ");
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
+
+        return restarunt.menues;
     }
 
 
