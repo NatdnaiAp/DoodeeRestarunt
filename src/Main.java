@@ -4,9 +4,9 @@ import java.sql.*;
 
 class Main {
 
-        static  Scanner scan  = new Scanner(System.in);
-        static Restarunt restarunt = new Restarunt();
-        static  Customer customer = new Customer();
+        public static  Scanner scan  = new Scanner(System.in);
+        public static Restarunt restarunt = new Restarunt();
+
         public static void main(String[] args) {
 
 
@@ -52,11 +52,7 @@ class Main {
 
 
         }
-        public static void showCustomer(){
-            for(Customer customer : restarunt.customers){
-                System.out.println(customer.id+"  "+customer.name);
-            }
-        }
+
 
 
         public static int chooseMenu() {
@@ -67,7 +63,7 @@ class Main {
         public static void payBills(){
             removeCustomer();
             System.out.print("Confirm ID For Pay Bills : ");
-            Integer customerId = scan.nextInt();
+            int customerId = scan.nextInt();
 
 
 
